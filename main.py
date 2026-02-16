@@ -5,7 +5,7 @@ def main():
     print("========================================")
     print("      TOYCEPTRON - TRAINING MODE        ")
     print("========================================")
-
+    
     # 1. Define the "XOR" Dataset
     # Inputs: [A, B] -> Target: [Result]
     training_data = [
