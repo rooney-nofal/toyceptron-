@@ -1,7 +1,7 @@
 import random
 from typing import List, Optional
 
-class Neuron:
+class Neuron: 
     """
     Represents a single unit of computation in a neural network layer.
     Performs a weighted sum of inputs plus a bias.
@@ -29,24 +29,37 @@ class Neuron:
 
     def forward(self, inputs: List[float]) -> float:
         """
-        Compute the output of the neuron for a given input vector.
-        Formula: sum(input_i * weight_i) + bias
-        
-        Args:
-            inputs (List[float]): The input vector.
-            
-        Returns:
-            float: The weighted sum plus bias (pre-activation).
+        Compute the output and SAVE it for backpropagation.
         """
         if len(inputs) != len(self.weights):
             raise ValueError(f"Input size ({len(inputs)}) must match weight size ({len(self.weights)}).")
-            
-        # Calculate dot product: sum(i * w)
-        # zip(inputs, self.weights) pairs them up: [(i1, w1), (i2, w2)...]
-        total = sum(i * w for i, w in zip(inputs, self.weights))
         
-        # Add bias
-        return total + self.bias
+        # SAVE the input (we need this to calculate the gradient later)
+        self.last_input = inputs
+        
+        # Calculate dot product
+        total = sum(i * w for i, w in zip(inputs, self.weights)) + self.bias
+        
+        # SAVE the pre-activation total (useful for some activation functions)
+        self.last_total = total
+        
+        return total
+    
+    def update_weights(self, delta: float, learning_rate: float):
+        """
+        Update weights and bias using the error term (delta) and saved input.
+        """
+        # 1. Update Bias
+        # CHANGE: Use += instead of -=
+        # We ADD the correction because error = (Target - Output)
+        self.bias += learning_rate * delta
+        
+        # 2. Update Weights
+        for i in range(len(self.weights)):
+            input_val = self.last_input[i]
+            gradient = delta * input_val
+            # CHANGE: Use += instead of -=
+            self.weights[i] += learning_rate * gradient
 
 if __name__ == "__main__":
     # --- Unit Test ---

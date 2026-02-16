@@ -40,6 +40,31 @@ class Layer:
             
         return output_vector
     
+    def backward(self, deltas: List[float], learning_rate: float) -> List[float]:
+        """
+        1. Calculate error to send back to previous layer.
+        2. Update weights of all neurons in this layer.
+        """
+        input_size = len(self.neurons[0].weights)
+        
+        # Initialize gradient for previous layer with 0.0
+        new_deltas = [0.0] * input_size
+        
+        # Loop through every neuron (j) and its corresponding error (delta)
+        for j, neuron in enumerate(self.neurons):
+            delta = deltas[j]
+            
+            # Accumulate gradient for previous layer: 
+            # error_i = sum( weight_ji * delta_j )
+            # We do this BEFORE updating weights to preserve the gradient logic
+            for i in range(input_size):
+                new_deltas[i] += neuron.weights[i] * delta
+            
+            # Now update the neuron (weights & bias)
+            neuron.update_weights(delta, learning_rate)
+            
+        return new_deltas
+    
 if __name__ == "__main__":
     # --- Unit Test ---
     print("Running Layer Unit Test...")

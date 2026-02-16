@@ -1,44 +1,61 @@
+import random
 from network import Network
 
 def main():
     print("========================================")
-    print("   TOYCEPTRON v1.2 - SYSTEM CHECK       ")
+    print("      TOYCEPTRON - TRAINING MODE        ")
     print("========================================")
 
-    # --- Test Case 1: Standard Sigmoid Network ---
-    print("\n[Test 1] Initializing Sigmoid Network...")
-    # Architecture: 2 Inputs -> 3 Hidden Neurons -> 1 Output Neuron
-    net_sigmoid = Network(layer_sizes=[2, 3, 1], activation="sigmoid")
-    net_sigmoid.summary()
-    
-    input_vec = [0.5, -0.2]
-    output = net_sigmoid.forward(input_vec)
-    print(f"Input: {input_vec}")
-    print(f"Output: {output}")
-    
-    # Verification: Sigmoid must be between 0 and 1
-    assert 0.0 <= output[0] <= 1.0, "Error: Sigmoid output out of range!"
-    print(">> Status: PASS (Sigmoid behavior confirmed)")
+    # 1. Define the "XOR" Dataset
+    # Inputs: [A, B] -> Target: [Result]
+    training_data = [
+        ([0.0, 0.0], [0.0]), # 0 XOR 0 = 0
+        ([0.0, 1.0], [1.0]), # 0 XOR 1 = 1
+        ([1.0, 0.0], [1.0]), # 1 XOR 0 = 1
+        ([1.0, 1.0], [0.0])  # 1 XOR 1 = 0
+    ]
 
-    # --- Test Case 2: ReLU Network (Deep Architecture) ---
-    print("\n[Test 2] Initializing ReLU Network (Deep)...")
-    # Architecture: 3 Inputs -> 4 Hidden -> 4 Hidden -> 2 Outputs
-    net_relu = Network(layer_sizes=[3, 4, 4, 2], activation="relu")
-    net_relu.summary()
-    
-    input_vec_2 = [1.0, -0.5, 0.0]
-    output_relu = net_relu.forward(input_vec_2)
-    print(f"Input: {input_vec_2}")
-    print(f"Output: {output_relu}")
-    
-    # Verification: ReLU must be non-negative
-    for val in output_relu:
-        assert val >= 0.0, "Error: ReLU output cannot be negative!"
-    print(">> Status: PASS (ReLU behavior confirmed)")
+    # 2. Initialize Network (TUNED FOR SUCCESS)
+    # 2 Inputs -> 4 Hidden Neurons (More Brain Power) -> 1 Output
+    print("Initializing Network...")
+    net = Network(layer_sizes=[2, 4, 1], activation="sigmoid")
+    net.summary()
 
-    print("\n========================================")
-    print("       ALL SYSTEMS OPERATIONAL          ")
-    print("========================================")
+    # 3. Training Loop (TUNED FOR SUCCESS)
+    epochs = 20000      # Doubled the training time
+    learning_rate = 1.0 # Doubled the learning speed
+    
+    print(f"\nTraining for {epochs} epochs...")
+    
+    for epoch in range(epochs):
+        total_error = 0.0
+        
+        for inputs, target in training_data:
+            net.train(inputs, target, learning_rate)
+            
+            # Check error
+            prediction = net.forward(inputs)
+            total_error += abs(target[0] - prediction[0])
+            
+        # Print progress every 2000 epochs
+        if (epoch + 1) % 2000 == 0:
+            print(f"Epoch {epoch+1}: Total Error = {total_error:.5f}")
+
+    print("\nTraining Complete! Testing results:")
+    print("-" * 30)
+
+    # 4. Final Validation
+    for inputs, target in training_data:
+        prediction = net.forward(inputs)[0]
+        rounded = 1 if prediction > 0.5 else 0
+        
+        print(f"Input: {inputs} -> Prediction: {prediction:.4f} -> Rounded: {rounded} (Target: {target[0]})")
+        
+        # We use a small range for error because floats are rarely exact
+        assert rounded == target[0], "Failed to learn pattern!"
+
+    print("-" * 30)
+    print("SUCCESS: The Network has learned XOR!")
 
 if __name__ == "__main__":
     main()
